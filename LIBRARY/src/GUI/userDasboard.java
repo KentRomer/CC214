@@ -2,7 +2,6 @@ package GUI;
 
 import javax.swing.*;
 import java.awt.*;
-import commonconstant.commonconstant;  // Ensure this import is correct
 
 public class userDasboard extends admin {
     public userDasboard() {
@@ -17,12 +16,7 @@ public class userDasboard extends admin {
         losLabel.setBounds(0, 0, 1300, 690);
         add(losLabel);
 
-        // Create and configure the AdminHomeLabel
-        JLabel AdminHomeLabel = new JLabel("Faena Aleph");
-        AdminHomeLabel.setBounds(0, 0, 520, 100);
-        AdminHomeLabel.setForeground(commonconstant.DARK_BLUE);  // Use the color constant
-        AdminHomeLabel.setFont(new Font("Georgia", Font.BOLD, 25));
-        add(AdminHomeLabel);
+
 
         // Create the text fields
         JTextField textField = new JTextField();

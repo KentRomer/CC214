@@ -6,7 +6,7 @@ public class admin extends JFrame {
     public admin(String title) {
         // The main GUI panel
         super(title);
-        setSize(1300, 690);
+        setSize(1300, 750);
 
         setDefaultCloseOperation(EXIT_ON_CLOSE);
 
