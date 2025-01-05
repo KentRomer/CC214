@@ -30,14 +30,15 @@ public class userDasboard extends admin {
         textField.setFont(new Font("Arial", Font.PLAIN, 20));
         add(textField);
 
-        JTextField passfield = new JTextField();
-        passfield.setBounds(225, 465, 240, 47);
-        passfield.setFont(new Font("Arial", Font.PLAIN, 20));
-        add(passfield);
+        // Replace the passfield with JPasswordField for password input
+        JPasswordField passField = new JPasswordField();
+        passField.setBounds(225, 465, 240, 47); // Same position as before
+        passField.setFont(new Font("Arial", Font.PLAIN, 20));
+        add(passField);
 
         // Add the transparent "Log In" button
         JButton loginButton = new JButton("Log In");
-        loginButton.setBounds(225, 530, 240, 55);  // Positioned under the passfield
+        loginButton.setBounds(225, 530, 240, 55);  // Positioned under the passField
         loginButton.setFont(new Font("Arial", Font.BOLD, 18));  // Bold font
         loginButton.setForeground(Color.WHITE);  // White text
         loginButton.setOpaque(false);  // Make the button's background transparent
@@ -45,10 +46,19 @@ public class userDasboard extends admin {
         loginButton.setBorderPainted(false);  // Remove border painting
         loginButton.setFocusPainted(false);  // Remove focus outline
         loginButton.addActionListener(e -> {
-            borrowBook borrowWindow = new borrowBook();
-            borrowWindow.setVisible(true);
-            this.dispose();
-    });
+            String username = textField.getText();
+            String password = new String(passField.getPassword());
+
+            // Validate login credentials
+            if (username.equals(signUp.userTable.get("username")) && password.equals(signUp.userTable.get("password"))) {
+                JOptionPane.showMessageDialog(this, "Login successful", "Success", JOptionPane.INFORMATION_MESSAGE);
+                borrowBook borrowWindow = new borrowBook();
+                borrowWindow.setVisible(true);
+                this.dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Invalid username or password", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
         add(loginButton);
 
         // Add the "Sign Up" button
@@ -60,13 +70,11 @@ public class userDasboard extends admin {
         signupButton.setContentAreaFilled(false);  // Remove button background
         signupButton.setBorderPainted(false);  // Remove border painting
         signupButton.addActionListener(e -> {
-            // Open the signUp class and close the current window
             signUp signUpWindow = new signUp();
             signUpWindow.setVisible(true);
             this.dispose(); // Close the userDasboard window
         });
         add(signupButton);
-
 
         // Create a transparent Exit button
         JButton exitButton = new JButton("Exit");
