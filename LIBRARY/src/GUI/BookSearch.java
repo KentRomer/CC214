@@ -1,20 +1,16 @@
 package GUI;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class BookSearch {
-
     // Available books
     private static ArrayList<String> books;
 
-    // Borrowed books
-    private static ArrayList<String> borrowedBooks = new ArrayList<>();
+    // Map to track borrowed books per user: username -> list of books
+    private static Map<String, ArrayList<String>> userBorrowedBooks = new HashMap<>();
 
-    // Borrow requests queue
-    private static Queue<String> borrowQueue = new LinkedList<>();
+    // Map to track borrow requests per user: username -> queue of requested books
+    private static Map<String, Queue<String>> userBorrowQueue = new HashMap<>();
 
     static {
         books = new ArrayList<>();
@@ -38,39 +34,51 @@ public class BookSearch {
         return results;
     }
 
-    public static boolean requestBorrow(String book) {
-        if (books.contains(book) && !borrowQueue.contains(book)) {
-            borrowQueue.add(book);
+    public static boolean requestBorrow(String username, String book) {
+        userBorrowQueue.putIfAbsent(username, new LinkedList<>());
+        Queue<String> userQueue = userBorrowQueue.get(username);
+
+        if (books.contains(book) && !userQueue.contains(book)) {
+            userQueue.add(book);
             return true;
         }
         return false;
     }
 
-    public static boolean approveRequest(String book) {
-        if (borrowQueue.contains(book)) {
-            borrowQueue.remove(book);
+    public static boolean approveRequest(String username, String book) {
+        userBorrowQueue.putIfAbsent(username, new LinkedList<>());
+        userBorrowedBooks.putIfAbsent(username, new ArrayList<>());
+
+        Queue<String> userQueue = userBorrowQueue.get(username);
+        ArrayList<String> userBooks = userBorrowedBooks.get(username);
+
+        if (userQueue.contains(book)) {
+            userQueue.remove(book);
             books.remove(book);
-            borrowedBooks.add(book);
+            userBooks.add(book);
             return true;
         }
         return false;
     }
 
-    public static boolean rejectRequest(String book) {
-        return borrowQueue.remove(book);
+    public static boolean rejectRequest(String username, String book) {
+        Queue<String> userQueue = userBorrowQueue.get(username);
+        return userQueue != null && userQueue.remove(book);
     }
 
-    public static List<String> getBorrowQueue() {
-        return new ArrayList<>(borrowQueue);
+    public static List<String> getBorrowQueue(String username) {
+        Queue<String> userQueue = userBorrowQueue.getOrDefault(username, new LinkedList<>());
+        return new ArrayList<>(userQueue);
     }
 
-    public static List<String> getBorrowedBooks() {
-        return new ArrayList<>(borrowedBooks);
+    public static List<String> getBorrowedBooks(String username) {
+        return new ArrayList<>(userBorrowedBooks.getOrDefault(username, new ArrayList<>()));
     }
 
-    public static boolean returnBook(String book) {
-        if (borrowedBooks.contains(book)) {
-            borrowedBooks.remove(book);
+    public static boolean returnBook(String username, String book) {
+        ArrayList<String> userBooks = userBorrowedBooks.get(username);
+        if (userBooks != null && userBooks.contains(book)) {
+            userBooks.remove(book);
             books.add(book);
             return true;
         }
