@@ -3,6 +3,8 @@ package GUI;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 public class userMain extends admin {
     public userMain() {
@@ -12,7 +14,7 @@ public class userMain extends admin {
 
     private void addGuiComponent() {
         // Load the image from resources folder
-        ImageIcon losIcon = new ImageIcon(getClass().getResource("/image/userMain.png"));
+        ImageIcon losIcon = new ImageIcon(getClass().getResource("/image/userprofile.png"));
         JLabel losLabel = new JLabel(losIcon);
         losLabel.setBounds(0, 0, 1300, 690);
         add(losLabel);
@@ -24,14 +26,41 @@ public class userMain extends admin {
         borrowButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Book Borrow button clicked!");
-                JOptionPane.showMessageDialog(
-                        null,
-                        "Successfully Borrowed!!",
-                        "Notification",
-                        JOptionPane.INFORMATION_MESSAGE
-                );
-                // Add your book borrow functionality here
+                String currentUser = UserManager.getCurrentUser();
+                if (currentUser == null || currentUser.isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Error: User session not found. Please log in again.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+                // Retrieve the borrowed books for the current user
+                List<String> userBorrowedBooks = new ArrayList<>();
+                for (BorrowRecord record : BookSearch.getBorrowRecords()) {
+                    if (record.getBorrowerUsername().equals(currentUser)) {
+                        userBorrowedBooks.add(record.getBookTitle());
+                    }
+                }
+
+                if (userBorrowedBooks.isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "You have not borrowed any books yet.",
+                            "No Borrowed Books",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                } else {
+                    String borrowedBooksMessage = String.join("\n", userBorrowedBooks);
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Books you have borrowed:\n" + borrowedBooksMessage,
+                            "Your Borrowed Books",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                }
             }
         });
         add(borrowButton);
@@ -43,14 +72,63 @@ public class userMain extends admin {
         returnButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                System.out.println("Return Book button clicked!");
-                JOptionPane.showMessageDialog(
+                String currentUser = UserManager.getCurrentUser();
+                if (currentUser == null || currentUser.isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "Error: User session not found. Please log in again.",
+                            "Error",
+                            JOptionPane.ERROR_MESSAGE
+                    );
+                    return;
+                }
+
+                // Retrieve the borrowed books for the current user
+                List<String> userBorrowedBooks = new ArrayList<>();
+                for (BorrowRecord record : BookSearch.getBorrowRecords()) {
+                    if (record.getBorrowerUsername().equals(currentUser)) {
+                        userBorrowedBooks.add(record.getBookTitle());
+                    }
+                }
+
+                if (userBorrowedBooks.isEmpty()) {
+                    JOptionPane.showMessageDialog(
+                            null,
+                            "You have no books to return.",
+                            "No Books to Return",
+                            JOptionPane.INFORMATION_MESSAGE
+                    );
+                    return;
+                }
+
+                String selectedBook = (String) JOptionPane.showInputDialog(
                         null,
-                        "Successfully Returned!!",
-                        "Notification",
-                        JOptionPane.INFORMATION_MESSAGE
+                        "Select a book to return:",
+                        "Return Book",
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        userBorrowedBooks.toArray(),
+                        userBorrowedBooks.get(0)
                 );
-                // Add your return book functionality here
+
+                if (selectedBook != null) {
+                    boolean returned = BookSearch.returnBook(selectedBook);
+                    if (returned) {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Successfully returned: " + selectedBook,
+                                "Book Returned",
+                                JOptionPane.INFORMATION_MESSAGE
+                        );
+                    } else {
+                        JOptionPane.showMessageDialog(
+                                null,
+                                "Failed to return: " + selectedBook,
+                                "Return Failed",
+                                JOptionPane.ERROR_MESSAGE
+                        );
+                    }
+                }
             }
         });
         add(returnButton);
@@ -65,14 +143,13 @@ public class userMain extends admin {
                 System.out.println("Back button clicked!");
 
                 // Create and show AdminGUI when back button is clicked
-                AdminGUI adminGUI = new AdminGUI();  // Instantiate the AdminGUI class
-                adminGUI.main(new String[0]);        // Call main method of AdminGUI (which sets it up)
+                userDasboard adminGUI = new userDasboard();
+                adminGUI.main(new String[0]);
 
                 dispose(); // Close the current userMain frame
             }
         });
         add(backButton);
-
 
         // Create "Log Out" button
         JButton logoutButton = new JButton("Log Out");
