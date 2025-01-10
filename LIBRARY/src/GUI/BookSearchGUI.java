@@ -3,9 +3,14 @@ package GUI;
 import javax.swing.*;
 import java.awt.event.*;
 import java.util.List;
+import java.util.ArrayList;
 
 public class BookSearchGUI {
+    private static String currentUsername;
+
     public static void main(String[] args) {
+        currentUsername = UserManager.getCurrentUser();
+
         // Create JFrame
         JFrame frame = new JFrame("Book Search");
         frame.setSize(500, 400);
@@ -16,7 +21,6 @@ public class BookSearchGUI {
         JButton borrowButton = new JButton("Borrow Book");
         JButton viewBorrowedButton = new JButton("View Borrowed Books");
         JButton returnBookButton = new JButton("Return Book");
-        JButton viewQueueButton = new JButton("View Pending Requests");
         JTextArea resultArea = new JTextArea(10, 40);
         resultArea.setEditable(false);
 
@@ -27,7 +31,6 @@ public class BookSearchGUI {
         panel.add(borrowButton);
         panel.add(viewBorrowedButton);
         panel.add(returnBookButton);
-        panel.add(viewQueueButton);
         frame.add(panel, "North");
         frame.add(new JScrollPane(resultArea), "Center");
 
@@ -72,27 +75,38 @@ public class BookSearchGUI {
             );
 
             if (selectedBook != null) {
-                boolean requested = BookSearch.requestBorrow(selectedBook);
+                boolean requested = BookSearch.requestBorrow(selectedBook, currentUsername);
                 if (requested) {
-                    JOptionPane.showMessageDialog(frame, "Borrow request added for: " + selectedBook);
+                    JOptionPane.showMessageDialog(frame,
+                            "Borrow request submitted for: " + selectedBook + "\nAwaiting admin approval.",
+                            "Request Submitted",
+                            JOptionPane.INFORMATION_MESSAGE);
                 } else {
-                    JOptionPane.showMessageDialog(frame, "Failed to request borrow for: " + selectedBook);
+                    JOptionPane.showMessageDialog(frame,
+                            "Failed to request borrow. Book may already be pending approval.",
+                            "Request Failed",
+                            JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
 
         // View Borrowed Books button action listener
         viewBorrowedButton.addActionListener(e -> {
-            List<String> borrowedBooks = BookSearch.getBorrowedBooks();
+            List<String> borrowedBooks = new ArrayList<>();
+            for (BorrowRecord record : BookSearch.getBorrowRecords()) {
+                if (record.getBorrowerUsername().equals(currentUsername)) {
+                    borrowedBooks.add(record.getBookTitle());
+                }
+            }
 
             if (borrowedBooks.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "No borrowed books.");
+                JOptionPane.showMessageDialog(frame, "You have no borrowed books.");
                 return;
             }
 
             JOptionPane.showMessageDialog(
                     frame,
-                    "Borrowed Books:\n" + String.join("\n", borrowedBooks),
+                    "Your Borrowed Books:\n" + String.join("\n", borrowedBooks),
                     "Borrowed Books",
                     JOptionPane.INFORMATION_MESSAGE
             );
@@ -100,10 +114,15 @@ public class BookSearchGUI {
 
         // Return Book button action listener
         returnBookButton.addActionListener(e -> {
-            List<String> borrowedBooks = BookSearch.getBorrowedBooks();
+            List<String> borrowedBooks = new ArrayList<>();
+            for (BorrowRecord record : BookSearch.getBorrowRecords()) {
+                if (record.getBorrowerUsername().equals(currentUsername)) {
+                    borrowedBooks.add(record.getBookTitle());
+                }
+            }
 
             if (borrowedBooks.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "No borrowed books to return.");
+                JOptionPane.showMessageDialog(frame, "You have no books to return.");
                 return;
             }
 
@@ -120,59 +139,15 @@ public class BookSearchGUI {
             if (selectedBook != null) {
                 boolean returned = BookSearch.returnBook(selectedBook);
                 if (returned) {
-                    JOptionPane.showMessageDialog(frame, "Returned: " + selectedBook);
+                    JOptionPane.showMessageDialog(frame, "Successfully returned: " + selectedBook);
                 } else {
                     JOptionPane.showMessageDialog(frame, "Failed to return: " + selectedBook);
                 }
             }
         });
 
-        // View Pending Requests button action listener
-        viewQueueButton.addActionListener(e -> {
-            List<String> borrowQueue = BookSearch.getBorrowQueue();
-
-            if (borrowQueue.isEmpty()) {
-                JOptionPane.showMessageDialog(frame, "No pending borrow requests.");
-                return;
-            }
-
-            String selectedBook = (String) JOptionPane.showInputDialog(
-                    frame,
-                    "Select a request to approve or reject:",
-                    "Pending Requests",
-                    JOptionPane.QUESTION_MESSAGE,
-                    null,
-                    borrowQueue.toArray(),
-                    borrowQueue.get(0)
-            );
-
-            if (selectedBook != null) {
-                int choice = JOptionPane.showConfirmDialog(
-                        frame,
-                        "Do you want to approve the request for:\n" + selectedBook,
-                        "Approve or Reject",
-                        JOptionPane.YES_NO_CANCEL_OPTION
-                );
-
-                if (choice == JOptionPane.YES_OPTION) {
-                    boolean approved = BookSearch.approveRequest(selectedBook.trim());
-                    if (approved) {
-                        JOptionPane.showMessageDialog(frame, "Request approved for: " + selectedBook);
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "Failed to approve the request. Try again.");
-                    }
-                } else if (choice == JOptionPane.NO_OPTION) {
-                    boolean rejected = BookSearch.rejectRequest(selectedBook.trim());
-                    if (rejected) {
-                        JOptionPane.showMessageDialog(frame, "Request rejected for: " + selectedBook);
-                    } else {
-                        JOptionPane.showMessageDialog(frame, "Failed to reject the request. Try again.");
-                    }
-                }
-            }
-        });
-
         // Display the frame
+        frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
 }

@@ -5,16 +5,34 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
+class BorrowRecord {
+    private final String bookTitle;
+    private final String borrowerUsername;
+
+    public BorrowRecord(String bookTitle, String borrowerUsername) {
+        this.bookTitle = bookTitle;
+        this.borrowerUsername = borrowerUsername != null ? borrowerUsername : "Unknown User";
+    }
+
+    public String getBookTitle() { return bookTitle; }
+    public String getBorrowerUsername() { return borrowerUsername; }
+}
+
 public class BookSearch {
-
-    // Available books
     private static ArrayList<String> books;
+    private static ArrayList<BorrowRecord> borrowRecords = new ArrayList<>();
+    private static Queue<PendingRequest> borrowQueue = new LinkedList<>();
+    private static List<BookListListener> listeners = new ArrayList<>();
 
-    // Borrowed books
-    private static ArrayList<String> borrowedBooks = new ArrayList<>();
+    static class PendingRequest {
+        String bookTitle;
+        String username;
 
-    // Borrow requests queue
-    private static Queue<String> borrowQueue = new LinkedList<>();
+        PendingRequest(String bookTitle, String username) {
+            this.bookTitle = bookTitle;
+            this.username = username;
+        }
+    }
 
     static {
         books = new ArrayList<>();
@@ -27,6 +45,34 @@ public class BookSearch {
         books.add("Mr. Rude & Me, ISBN910112");
         books.add("Something Inside, ISBN456789");
     }
+    public interface BookListListener {
+        void onBookListUpdated(List<String> updatedBooks);
+    }
+
+    public static void addBookListListener(BookListListener listener) {
+        listeners.add(listener);
+    }
+
+    public static void removeBookListListener(BookListListener listener) {
+        listeners.remove(listener);
+    }
+
+    private static void notifyListeners() {
+        for (BookListListener listener : listeners) {
+            listener.onBookListUpdated(new ArrayList<>(books));
+        }
+    }
+
+    public static void addBook(String book) {
+        books.add(book);
+        notifyListeners();
+    }
+
+    public static void removeBook(String book) {
+        books.remove(book);
+        notifyListeners();
+    }
+
 
     public static List<String> searchBooks(String searchQuery) {
         ArrayList<String> results = new ArrayList<>();
@@ -38,41 +84,69 @@ public class BookSearch {
         return results;
     }
 
-    public static boolean requestBorrow(String book) {
-        if (books.contains(book) && !borrowQueue.contains(book)) {
-            borrowQueue.add(book);
+    public static boolean requestBorrow(String book, String username) {
+        if (books.contains(book) && !isBookInQueue(book)) {
+            borrowQueue.add(new PendingRequest(book, username));
             return true;
         }
         return false;
     }
 
-    public static boolean approveRequest(String book) {
-        if (borrowQueue.contains(book)) {
-            borrowQueue.remove(book);
-            books.remove(book);
-            borrowedBooks.add(book);
+    private static boolean isBookInQueue(String book) {
+        for (PendingRequest request : borrowQueue) {
+            if (request.bookTitle.equals(book)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean approveRequest(String bookInfo) {
+        // Extract just the book title from the info string (removes the "Requested by: username" part)
+        String[] parts = bookInfo.split(" \\(Requested by: ");
+        String bookTitle = parts[0];
+        String username = parts[1].substring(0, parts[1].length() - 1); // Remove the closing parenthesis
+
+        PendingRequest requestToApprove = null;
+        for (PendingRequest request : borrowQueue) {
+            if (request.bookTitle.equals(bookTitle) && request.username.equals(username)) {
+                requestToApprove = request;
+                break;
+            }
+        }
+
+        if (requestToApprove != null) {
+            borrowQueue.remove(requestToApprove);
+            books.remove(requestToApprove.bookTitle);
+            borrowRecords.add(new BorrowRecord(requestToApprove.bookTitle, requestToApprove.username));
             return true;
         }
         return false;
     }
 
     public static boolean rejectRequest(String book) {
-        return borrowQueue.remove(book);
+        return borrowQueue.removeIf(request -> request.bookTitle.equals(book));
     }
 
     public static List<String> getBorrowQueue() {
-        return new ArrayList<>(borrowQueue);
+        List<String> queueBooks = new ArrayList<>();
+        for (PendingRequest request : borrowQueue) {
+            queueBooks.add(request.bookTitle + " (Requested by: " + request.username + ")");
+        }
+        return queueBooks;
     }
 
-    public static List<String> getBorrowedBooks() {
-        return new ArrayList<>(borrowedBooks);
+    public static List<BorrowRecord> getBorrowRecords() {
+        return new ArrayList<>(borrowRecords);
     }
 
     public static boolean returnBook(String book) {
-        if (borrowedBooks.contains(book)) {
-            borrowedBooks.remove(book);
-            books.add(book);
-            return true;
+        for (BorrowRecord record : borrowRecords) {
+            if (record.getBookTitle().equals(book)) {
+                borrowRecords.remove(record);
+                books.add(book);
+                return true;
+            }
         }
         return false;
     }

@@ -9,7 +9,7 @@ public class UserManager {
     // Admin credentials
     private static final String ADMIN_USERNAME = "manager001";
     private static final String ADMIN_PASSWORD = "bookeeper4ever";
-    
+    private static String currentUser;
     // User data structure
     public static class UserData {
         public String password;
@@ -22,7 +22,13 @@ public class UserManager {
             this.email = email;
         }
     }
-    
+    public static void setCurrentUser(String username) {
+        currentUser = username;
+    }
+
+    public static String getCurrentUser() {
+        return currentUser;
+    }
     // Register a new user
     public static boolean registerUser(String username, String password, String fullName, String email) {
         if (username == null || password == null || username.trim().isEmpty() || password.trim().isEmpty()) {
@@ -44,9 +50,13 @@ public class UserManager {
         if (username == null || password == null) {
             return false;
         }
-        
+
         UserData userData = userDatabase.get(username);
-        return userData != null && userData.password.equals(password);
+        if (userData != null && userData.password.equals(password)) {
+            setCurrentUser(username); // Set current user on successful login
+            return true;
+        }
+        return false;
     }
     
     // Check admin credentials

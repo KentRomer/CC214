@@ -16,7 +16,7 @@ public class userDasboard extends admin {
     private void addGuiComponent() {
         ImageIcon losIcon = new ImageIcon(getClass().getResource("/image/LogIn.png"));
         JLabel losLabel = new JLabel(losIcon);
-        losLabel.setBounds(0, 0, 1300, 690);
+        losLabel.setBounds(0, -2, 1300, 690);
         add(losLabel);
 
         textField = new JTextField();
@@ -66,18 +66,15 @@ public class userDasboard extends admin {
         String username = textField.getText();
         String password = new String(passField.getPassword());
 
-        // Check for admin credentials first
         if (UserManager.isAdmin(username, password)) {
+            UserManager.setCurrentUser(username); // Set current user for admin
             JOptionPane.showMessageDialog(this, "Welcome Admin!", "Success", JOptionPane.INFORMATION_MESSAGE);
-            // Create and show the AdminGUI
             SwingUtilities.invokeLater(() -> {
                 AdminGUI.main(new String[0]);
                 this.dispose();
             });
-        }
-        // If not admin, check for regular user credentials
-        else if (UserManager.isValidUser(username, password)) {
-            this.currentUsername = username;
+        } else if (UserManager.isValidUser(username, password)) {
+            // Current user is already set in isValidUser method
             JOptionPane.showMessageDialog(this, "Login successful", "Success", JOptionPane.INFORMATION_MESSAGE);
             Library borrowWindow = new Library();
             borrowWindow.setVisible(true);
