@@ -79,7 +79,7 @@ public class userDasboard extends admin {
         else if (UserManager.isValidUser(username, password)) {
             this.currentUsername = username;
             JOptionPane.showMessageDialog(this, "Login successful", "Success", JOptionPane.INFORMATION_MESSAGE);
-            borrowBook borrowWindow = new borrowBook(username);
+            Library borrowWindow = new Library();
             borrowWindow.setVisible(true);
             this.dispose();
         } else {
