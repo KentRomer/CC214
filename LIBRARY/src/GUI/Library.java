@@ -198,6 +198,9 @@ public class Library extends JFrame {
         }
     }
 
+    // Add this method to your existing Library.java file
+// Replace the existing handleBorrowBook method with this one:
+
     private void handleBorrowBook() {
         String selectedBook = resultList.getSelectedValue();
 
@@ -206,13 +209,22 @@ public class Library extends JFrame {
             return;
         }
 
-        boolean success = BookSearch.requestBorrow(currentUsername, selectedBook);
-        if (success) {
-            JOptionPane.showMessageDialog(this, "Borrow request added for: " + selectedBook);
-        } else {
-            JOptionPane.showMessageDialog(this, "Failed to request borrow. Book might already be in your queue.");
+        // Create a pending request file or update database
+        try {
+            java.io.File requestsFile = new java.io.File("pending_requests.txt");
+            java.io.FileWriter writer = new java.io.FileWriter(requestsFile, true);
+            writer.write(currentUsername + "," + selectedBook + "," + java.time.LocalDateTime.now() + "\n");
+            writer.close();
+
+            JOptionPane.showMessageDialog(this, "Borrow request submitted for: " + selectedBook +
+                    "\nPlease wait for admin approval.");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error submitting request. Please try again.");
+            ex.printStackTrace();
         }
     }
+
+
 
     private void showMyBooks() {
         java.util.List<String> borrowedBooks = BookSearch.getBorrowedBooks(currentUsername);
