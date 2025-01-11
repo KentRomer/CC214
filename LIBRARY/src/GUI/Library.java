@@ -73,7 +73,7 @@ public class Library extends JFrame {
         borrowButton.setFont(new Font("Arial", Font.BOLD, 14));
         searchPanel.add(borrowButton);
 
-        viewBorrowedButton = new JButton("View Borrowed Books");
+        viewBorrowedButton = new JButton("View Borrowed Books");////
         viewBorrowedButton.setBounds(160, 280, 150, 30);
         styleButton(viewBorrowedButton);
 
@@ -87,8 +87,8 @@ public class Library extends JFrame {
 
         // Add profile button
         JButton profileButton = new JButton("Profile");
-        profileButton.setBounds(1115, 40, 70, 40);
-        profileButton.setFont(new Font("Arial", Font.BOLD, 14));
+        profileButton.setBounds(1115, 44, 70, 40);
+        profileButton.setFont(new Font("Arial", Font.BOLD, 22));
         profileButton.setBackground(new Color(0, 0, 0, 0));
         profileButton.setForeground(new Color(0, 0, 0, 0));
         profileButton.setFocusPainted(false);
@@ -170,6 +170,7 @@ public class Library extends JFrame {
         profileWindow.setSize(1300, 690);
         profileWindow.setLocationRelativeTo(null);
         profileWindow.setVisible(true);
+
     }
 
     private void handleLogout() {

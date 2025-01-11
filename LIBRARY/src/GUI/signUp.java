@@ -20,17 +20,11 @@ public class signUp extends admin {
 
     private void addGuiComponent() {
         // Background setup
-        ImageIcon backgroundIcon = new ImageIcon(getClass().getResource("/image/SignUp.png"));
+        ImageIcon backgroundIcon = new ImageIcon(getClass().getResource("/image/signup.png"));
         JLabel backgroundLabel = new JLabel(backgroundIcon);
         backgroundLabel.setBounds(0, 0, 1300, 690);
         add(backgroundLabel);
 
-        // Title label
-        JLabel AdminHomeLabel = new JLabel("Faena Aleph");
-        AdminHomeLabel.setBounds(50, 30, 400, 50);
-        AdminHomeLabel.setForeground(commonconstant.DARK_BLUE);
-        AdminHomeLabel.setFont(new Font("Georgia", Font.BOLD, 35));
-        backgroundLabel.add(AdminHomeLabel);
 
         // Input fields
         fullNameField = createHintedTextField("Full Name");

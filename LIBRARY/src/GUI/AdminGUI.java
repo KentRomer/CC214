@@ -18,7 +18,7 @@ public class AdminGUI {
     }
 
     private static void addGuiComponent(JFrame frame) {
-        ImageIcon losIcon = new ImageIcon(AdminGUI.class.getResource("/image/paynal.png"));
+        ImageIcon losIcon = new ImageIcon(AdminGUI.class.getResource("/image/adminhome.png"));
         JLabel losLabel = new JLabel(losIcon);
         losLabel.setBounds(0, 0, 1300, 690);
         frame.add(losLabel);

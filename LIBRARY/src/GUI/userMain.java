@@ -135,7 +135,7 @@ public class userMain extends admin {
 
         // Create "Back" button
         JButton backButton = new JButton("Back");
-        backButton.setBounds(1000, 10, 70, 50); // Position and size of the button
+        backButton.setBounds(1120, 10, 70, 50); // Position and size of the button
         makeButtonTransparent(backButton);
         backButton.addActionListener(new ActionListener() {
             @Override
@@ -143,7 +143,7 @@ public class userMain extends admin {
                 System.out.println("Back button clicked!");
 
                 // Create and show AdminGUI when back button is clicked
-                userDasboard adminGUI = new userDasboard();
+                Library adminGUI = new Library();
                 adminGUI.main(new String[0]);
 
                 dispose(); // Close the current userMain frame
